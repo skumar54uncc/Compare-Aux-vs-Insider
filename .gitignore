@@ -1,0 +1,6 @@
+instagram-*/
+__pycache__/
+.DS_Store
+*.pyc
+.cursor/
+agent-transcripts/

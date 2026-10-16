@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CLT Instagram comparison · Aux Services vs Niner Insider</title>
+<style>
+  :root {
+    --navy: #1b365d;
+    --gold: #b9975b;
+    --ink: #1f2937;
+    --muted: #5b6472;
+    --line: #d9d3c6;
+    --bg: #f6f3ec;
+    --card: #fff;
+    --aux: #1b365d;
+    --niner: #c45c26;
+    --warn: #8a4b12;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 "Source Sans 3", "Segoe UI", Calibri, sans-serif; }
+  header {
+    background: var(--navy); color: #fff; padding: 22px 28px 18px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; }
+  header p { margin: 0; color: #d7deea; font-size: 13px; max-width: 980px; }
+  .range {
+    display: inline-block; margin-top: 10px; padding: 5px 10px;
+    background: #b9975b; color: #1b365d; font-size: 13px; font-weight: 700;
+  }
+  .wrap { padding: 20px 28px 48px; max-width: 1240px; margin: 0 auto; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+  .filters button {
+    border: 1px solid var(--line); background: #fff; color: var(--navy);
+    padding: 7px 12px; border-radius: 999px; cursor: pointer; font-size: 13px;
+  }
+  .filters button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .verdict {
+    background: #fff; border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 18px;
+  }
+  .verdict h2 { margin: 0 0 8px; font-size: 16px; color: var(--navy); }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .stat { background: #fff; border: 1px solid var(--line); padding: 12px 14px; }
+  .stat .k { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .stat .v { font-size: 22px; font-weight: 700; color: var(--navy); margin-top: 4px; }
+  .stat .s { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .perf { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0 0; }
+  .perf div { background: #f6f3ec; padding: 10px 12px; }
+  .perf .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+  .perf .v { font-size: 18px; font-weight: 700; margin-top: 4px; }
+  .card { background: #fff; border: 1px solid var(--line); padding: 14px 16px; }
+  .card h3 { margin: 0 0 10px; font-size: 15px; color: var(--navy); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .aux { color: var(--aux); font-weight: 650; }
+  .niner { color: var(--niner); font-weight: 650; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .warn { background: #f8efe3; border: 1px solid #e4d0b0; padding: 10px 12px; font-size: 13px; color: var(--warn); margin-bottom: 18px; }
+  .chart { height: 300px; position: relative; }
+  svg { width: 100%; height: 100%; }
+  .legend { display: flex; gap: 16px; align-items: center; font-size: 12px; margin: 0 0 8px; }
+  .swatch { width: 12px; height: 12px; display: inline-block; margin-right: 6px; vertical-align: middle; }
+  .tip {
+    position: fixed; pointer-events: none; display: none;
+    background: #1b365d; color: #fff; padding: 8px 10px; font-size: 12px;
+    border-radius: 4px; z-index: 20; max-width: 240px; line-height: 1.4;
+  }
+  .month-table { border-collapse: separate; border-spacing: 0; }
+  .month-table th, .month-table td { border: 1px solid #d9d3c6; }
+  .month-table thead th { background: #eef1f6; color: var(--navy); }
+  .month-table .pair { border-left: 3px solid #1b365d; border-right: 3px solid #1b365d; }
+  .month-table .pair2 { border-left: 3px solid #c45c26; border-right: 3px solid #c45c26; }
+  .cmp-wrap { overflow-x: auto; }
+  .cmp { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp th, .cmp td { border: none; vertical-align: middle; }
+  .cmp thead th {
+    text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 650;
+    color: var(--navy); background: transparent;
+  }
+  .cmp thead .metric { text-align: center; padding: 8px 8px 2px; }
+  .cmp thead .who { font-size: 11px; font-weight: 600; padding: 0 10px 10px; border-bottom: 1px solid var(--line); }
+  .cmp thead .who.aux { color: var(--aux); }
+  .cmp thead .who.niner { color: var(--niner); }
+  .cmp thead .month-h { text-align: left; padding: 8px 12px 10px 4px; border-bottom: 1px solid var(--line); }
+  .cmp tbody tr:nth-child(even) { background: #faf8f4; }
+  .cmp tbody tr:hover { background: #f1ece3; }
+  .cmp td { padding: 8px 10px; border-bottom: 1px solid #eee8dc; }
+  .cmp .month { white-space: nowrap; font-weight: 650; color: var(--navy); padding-left: 4px; }
+  .cmp .partial .tag { display: block; font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+  .cmp .split { border-left: 1px solid #e4ded1; }
+  .cmp .win { font-weight: 700; }
+  .cmp .win.aux { background: #e4ebf4; color: var(--aux); }
+  .cmp .win.niner { background: #f6e8df; color: var(--niner); }
+  .cmp .lose { color: #8a9099; font-weight: 400; }
+  .cmp .tie { color: var(--ink); font-weight: 600; }
+  .cmp tfoot td {
+    border-top: 2px solid var(--navy); background: #eef1f6;
+    font-weight: 700; padding-top: 11px; padding-bottom: 11px;
+  }
+  .cmp tfoot .month { font-size: 13px; }
+  .cmp-key { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .cmp-key i { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; }
+  .aud-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .aud-col h4 { margin: 0 0 8px; font-size: 13px; }
+  .bar-row { display: grid; grid-template-columns: 70px 1fr 42px; gap: 8px; align-items: center; margin: 5px 0; font-size: 12px; }
+  .bar-track { height: 8px; background: #ece8df; }
+  .bar-fill { height: 8px; }
+  footer { font-size: 12px; color: var(--muted); margin-top: 24px; line-height: 1.55; }
+  @media (max-width: 900px) {
+    .grid, .two { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .grid, .two, .perf { grid-template-columns: 1fr 1fr; }
+    .wrap, header { padding-left: 14px; padding-right: 14px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>@cltauxservices vs @clt_ninerinsider</h1>
+  <p>Fair comparison from both Instagram data packets. Every metric on this page uses the same dates.</p>
+  <div class="range">Comparison window: October 14, 2025 – October 8, 2026</div>
+</header>
+<div class="wrap">
+  <div class="warn" id="rangeNote"></div>
+  <div class="verdict" id="verdict"></div>
+  <div class="grid" id="kpis"></div>
+  <div class="two">
+    <div class="card">
+      <h3>Same-window totals (Oct 14, 2025 – Oct 8, 2026)</h3>
+      <div id="official"></div>
+      <p class="note" id="fairNote"></p>
+    </div>
+    <div class="card">
+      <h3>Follower overlap (Venn)</h3>
+      <div class="chart" id="venn" style="height:260px"></div>
+      <p class="note" id="vennNote"></p>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <h3 id="chartTitle1">How they performed, month by month</h3>
+    <p class="note" id="chartContext1" style="margin-top:0">One chart. Pick a metric. The lines show who led each month in the shared window.</p>
+    <div class="filters" id="metricBtns"></div>
+    <div class="legend"><span><i class="swatch" style="background:#1b365d"></i>Aux Services</span><span><i class="swatch" style="background:#c45c26"></i>Niner Insider</span></div>
+    <div class="chart" id="line" style="height:340px"></div>
+    <div class="perf" id="perf"></div>
+    <p class="note">Hover a point for that month. October 2026 is through October 8 only. Higher is better for every metric here.</p>
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <h3>Month-by-month · Oct 14, 2025 – Oct 8, 2026</h3>
+    <div id="monthTable"></div>
+  </div>
+  <div class="card" style="margin-bottom:18px">
+    <h3>Audience (official 90-day card)</h3>
+    <div id="audience"></div>
+  </div>
+  <div class="two" style="margin-top:14px">
+    <div class="card">
+      <h3>Top Aux reels in the dump</h3>
+      <div id="topAux"></div>
+    </div>
+    <div class="card">
+      <h3>Top Niner reels in the dump</h3>
+      <div id="topNiner"></div>
+    </div>
+  </div>
+  <footer id="pageFoot"></footer>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+const DATA = {"built":"2026-10-15T23:16:44","windows":{"label":"October 14, 2025 \u2013 October 8, 2026","start":"2025-10-14","end":"2026-10-08","insider_start":"2025-06-24","aux_packet":"October 14, 2025 \u2013 October 14, 2026","niner_latest":"October 8, 2026","aux_generated":"2026-10-14","niner_generated":"2026-10-09","note":"Every comparison metric is cut to Oct 14, 2025\u2013Oct 8, 2026. Aux\u2019s Instagram packet only contained Oct 14, 2025\u2013Oct 14, 2026. Niner\u2019s dated files run through Oct 8, 2026, so both accounts stop on Oct 8."},"aux":{"handle":"@cltauxservices","signup":{"Username":"UNCCAUX","Time":"Dec 06, 2013 8:36 am"},"official":{"generated":"2026-10-14T12:48Z","audience":{"Date Range":"Jul 16 - Oct 13","Followers":"2,816","Followers Delta":"+16.4% vs Apr 17 - Jul 15","Follows":"518","Unfollows":"121","Overall followers":"397","Follower Percentage by City":"Charlotte: 48.6%, Concord: 2.1%, Raleigh: 2%, Harrisburg: 1.5%, Huntersville: 1.3%","Follower Percentage by Country":"United States: 96.6%, India: 0.8%, Nigeria: 0.2%, Pakistan: 0.2%, Peru: 0.1%","Follower Percentage by Age for All Genders":"13-17: 0.7%, 18-24: 38.1%, 25-34: 26.7%, 35-44: 10.3%, 45-54: 15.5%, 55-64: 6.7%, 65+: 1.7%","Follower Percentage by Age for Men":"13-17: 1.4%, 18-24: 40.4%, 25-34: 29.1%, 35-44: 11%, 45-54: 11.5%, 55-64: 5%, 65+: 1.2%","Follower Percentage by Age for Women":"13-17: 0.4%, 18-24: 36%, 25-34: 19.6%, 35-44: 11%, 45-54: 22.4%, 55-64: 9.1%, 65+: 1.3%","Total Follower Percentage for Men":"33.6%","Total Follower Percentage for Women":"66.3%","Monday Follower Activity":"2,069","Tuesday Follower Activity":"2,085","Wednesday Follower Activity":"2,081","Thursday Follower Activity":"2,082","Friday Follower Activity":"2,061","Saturday Follower Activity":"2,055","Sunday Follower Activity":"2,086"},"reach":{"Date Range":"Jul 16 - Oct 13","Accounts Reached":"48986","Accounts Reached Delta":"+121% vs Apr 17 - Jul 15","Followers":"4.2%","Non-Followers":"95.8%","Non-Followers Delta":"You reached +129% more accounts that weren&#039;t following you compared to Apr 17 - Jul 15.","Impressions":"216,014","Impressions Delta":"+162%","Profile visits":"3,869","Profile Visits Delta":"+157%","External link taps":"526","External link taps delta":"+630%","Business address taps":"9","Business Address Taps Delta":"+80%"},"interactions":{"Date Range":"Jul 16 - Oct 13","Content Interactions":"19,429","Content Interactions Delta":"+133% vs Apr 17 - Jul 15","Post Interactions":"13,547","Post Interactions Delta":"+123% vs Apr 17 - Jul 15","Story Interactions":"407","Story Interactions Delta":"+1,030% vs Apr 17 - Jul 15","Video Interactions":"0","Video Interactions Delta":"0% vs Apr 17 - Jul 15","Reels Interactions":"5,475","Reels Interactions Delta":"+145% vs Apr 17 - Jul 15","Live Video Interactions":"0","Live Video Interactions Delta":"0% vs Apr 17 - Jul 15","Post Likes":"9,128","Post Comments":"104","Post Shares":"1,883","Post Saves":"434","Story Replies":"4","Story Shares":"84","Reels Likes":"3,909","Reels Comments":"201","Reels Shares":"571","Reels Saves":"197","Accounts engaged":"6,504","Accounts Engaged Delta":"+109% vs Apr 17 - Jul 15","Engaged Account By Follow Type":"Followers: 14.4%, Non-followers: 85.6%","You engaged delta% more accounts that weren\u2019t following you compared to previous period":"+124% vs Apr 17 - Jul 15"}},"follower_count":847,"follower_count_window":847,"following_count":0,"insight_counts":{"posts":34,"reels":33,"stories":404},"top_reels":[{"kind":"reel","date":"2026-04-09T18:50:00","ym":"2026-04","impressions":7986.0,"reach":7799.0,"likes":317.0,"comments":1.0,"shares":21.0,"saves":5.0,"follows":0,"visits":0,"engagements":344.0,"duration":44.0,"caption":"Happy 4/9 Day! \ud83e\udd19 Niners draw the All-in-C logo from memory \ud83e\udde0","hour":18,"weekday":"Thursday"},{"kind":"reel","date":"2026-06-12T09:17:00","ym":"2026-06","impressions":7094.0,"reach":6314.0,"likes":201.0,"comments":2.0,"shares":20.0,"saves":10.0,"follows":0,"visits":0,"engagements":233.0,"duration":10.0,"caption":"The dining hall understood the assignment \ud83c\udf55\u2728 Meal plans for Fall 2026 are now live! See which plan is best for you through the link in bio \ud83d\udd17","hour":9,"weekday":"Friday"},{"kind":"reel","date":"2026-08-01T08:38:00","ym":"2026-08","impressions":5593.0,"reach":5497.0,"likes":361.0,"comments":0,"shares":144.0,"saves":18.0,"follows":0,"visits":0,"engagements":523.0,"duration":11.0,"caption":"get your parking permits through the link in bio \ud83d\udd25","hour":8,"weekday":"Saturday"},{"kind":"reel","date":"2026-03-17T08:26:00","ym":"2026-03","impressions":4705.0,"reach":4569.0,"likes":251.0,"comments":2.0,"shares":63.0,"saves":7.0,"follows":0,"visits":0,"engagements":323.0,"duration":6.0,"caption":"Our closets are always green \ud83c\udf40","hour":8,"weekday":"Tuesday"},{"kind":"reel","date":"2026-08-31T06:41:00","ym":"2026-08","impressions":4479.0,"reach":3961.0,"likes":112.0,"comments":0,"shares":17.0,"saves":0,"follows":0,"visits":0,"engagements":129.0,"duration":18.0,"caption":"Welcome to Niner Nation, &#064;halfmoonempanadas \ud83c\udf1b\u2728","hour":6,"weekday":"Monday"},{"kind":"reel","date":"2026-06-17T08:10:00","ym":"2026-06","impressions":4222.0,"reach":3739.0,"likes":77.0,"comments":0,"shares":5.0,"saves":3.0,"follows":0,"visits":0,"engagements":85.0,"duration":17.0,"caption":"Call it intuition, call it fate... I ended up at Qdoba \ud83c\udf2f\u2728 FREE chips &amp; salsa with any entr\u00e9e through June 24.","hour":8,"weekday":"Wednesday"},{"kind":"reel","date":"2026-09-16T05:31:00","ym":"2026-09","impressions":3997.0,"reach":3684.0,"likes":92.0,"comments":5.0,"shares":34.0,"saves":2.0,"follows":0,"visits":0,"engagements":133.0,"duration":86.0,"caption":"Thinking about your next weekend hangout? Check out all these cool spots in NoDa, all accessible by the light rail with your CATS Pass app. \ud83d\ude8a Charlotte students can ride for free b","hour":5,"weekday":"Wednesday"},{"kind":"reel","date":"2026-09-27T12:27:00","ym":"2026-09","impressions":3773.0,"reach":3340.0,"likes":122.0,"comments":0,"shares":47.0,"saves":9.0,"follows":0,"visits":0,"engagements":178.0,"duration":18.0,"caption":"Niner Nation Week is happening this week! \ud83e\udd19 Every day during Homecoming week you can dress up with the day\u2019s theme to get a 20% discount* on purchases in Barnes &amp; Noble Charlot","hour":12,"weekday":"Sunday"},{"kind":"reel","date":"2026-04-29T14:39:00","ym":"2026-04","impressions":3745.0,"reach":3289.0,"likes":73.0,"comments":7.0,"shares":26.0,"saves":1.0,"follows":0,"visits":0,"engagements":107.0,"duration":93.0,"caption":"Crush those finals y\u2019all \ud83e\udee1","hour":14,"weekday":"Wednesday"},{"kind":"reel","date":"2026-01-30T14:11:00","ym":"2026-01","impressions":3580.0,"reach":3294.0,"likes":151.0,"comments":11.0,"shares":64.0,"saves":6.0,"follows":0,"visits":0,"engagements":232.0,"duration":80.0,"caption":"\ud83c\udfa4 Trivia Time is here! Alan and Henry put their knowledge to the test, would you get these right? \ud83d\udc40 Play along and let us know!","hour":14,"weekday":"Friday"},{"kind":"reel","date":"2026-03-18T12:03:00","ym":"2026-03","impressions":3229.0,"reach":2950.0,"likes":144.0,"comments":7.0,"shares":124.0,"saves":3.0,"follows":0,"visits":0,"engagements":278.0,"duration":91.0,"caption":"Get to class on time with &#064;Lime \ud83c\udf4b\u200d\ud83d\udfe9","hour":12,"weekday":"Wednesday"},{"kind":"reel","date":"2026-04-06T15:29:00","ym":"2026-04","impressions":3197.0,"reach":2464.0,"likes":79.0,"comments":1.0,"shares":17.0,"saves":1.0,"follows":0,"visits":0,"engagements":98.0,"duration":30.0,"caption":"Get hype! \ud83d\udd25The Gold Rush Cook Off is this Wednesday, April 8. \ud83c\udf73Watch the battle between SoVi vs Social 704 featuring our executive dining hall chefs, bakers and students Jira &amp;","hour":15,"weekday":"Monday"}],"top_posts":[{"kind":"post","date":"2026-07-30T11:07:00","ym":"2026-07","impressions":8905.0,"reach":7593.0,"likes":319.0,"comments":0,"shares":341.0,"saves":34.0,"follows":29.0,"visits":322.0,"engagements":694.0,"duration":null,"caption":"","hour":11,"weekday":"Thursday"},{"kind":"post","date":"2026-05-26T12:21:00","ym":"2026-05","impressions":4971.0,"reach":4532.0,"likes":129.0,"comments":0,"shares":29.0,"saves":9.0,"follows":1.0,"visits":32.0,"engagements":167.0,"duration":null,"caption":"Head over to QDOBA Mexican Eats in Upper Prospector to take advantage of FREE chips and salsa with every entr\u00e9e! Limited to Summer I only: May 18 to June 24, 2026.","hour":12,"weekday":"Tuesday"},{"kind":"post","date":"2026-01-23T07:58:00","ym":"2026-01","impressions":4169.0,"reach":3527.0,"likes":161.0,"comments":2.0,"shares":7.0,"saves":5.0,"follows":1.0,"visits":51.0,"engagements":175.0,"duration":null,"caption":"","hour":7,"weekday":"Friday"},{"kind":"post","date":"2026-07-10T12:39:00","ym":"2026-07","impressions":3141.0,"reach":2601.0,"likes":57.0,"comments":0,"shares":5.0,"saves":3.0,"follows":0,"visits":3.0,"engagements":65.0,"duration":null,"caption":"","hour":12,"weekday":"Friday"},{"kind":"post","date":"2026-03-10T13:00:00","ym":"2026-03","impressions":2755.0,"reach":2234.0,"likes":70.0,"comments":5.0,"shares":8.0,"saves":1.0,"follows":0,"visits":75.0,"engagements":84.0,"duration":null,"caption":"","hour":13,"weekday":"Tuesday"},{"kind":"post","date":"2025-10-20T14:14:00","ym":"2025-10","impressions":1702.0,"reach":1623.0,"likes":80.0,"comments":0,"shares":7.0,"saves":1.0,"follows":0,"visits":49.0,"engagements":88.0,"duration":null,"caption":"","hour":14,"weekday":"Monday"},{"kind":"post","date":"2026-08-03T14:07:00","ym":"2026-08","impressions":1652.0,"reach":1378.0,"likes":52.0,"comments":1.0,"shares":15.0,"saves":6.0,"follows":0,"visits":36.0,"engagements":74.0,"duration":null,"caption":"","hour":14,"weekday":"Monday"},{"kind":"post","date":"2026-01-05T12:57:00","ym":"2026-01","impressions":1648.0,"reach":1337.0,"likes":48.0,"comments":0,"shares":6.0,"saves":5.0,"follows":3.0,"visits":22.0,"engagements":59.0,"duration":null,"caption":"","hour":12,"weekday":"Monday"},{"kind":"post","date":"2026-05-29T08:26:00","ym":"2026-05","impressions":1326.0,"reach":1162.0,"likes":25.0,"comments":0,"shares":6.0,"saves":0,"follows":0,"visits":8.0,"engagements":31.0,"duration":null,"caption":"","hour":8,"weekday":"Friday"},{"kind":"post","date":"2026-03-04T13:40:00","ym":"2026-03","impressions":1284.0,"reach":1079.0,"likes":45.0,"comments":0,"shares":3.0,"saves":0,"follows":0,"visits":37.0,"engagements":48.0,"duration":null,"caption":"","hour":13,"weekday":"Wednesday"},{"kind":"post","date":"2025-12-01T13:18:00","ym":"2025-12","impressions":1284.0,"reach":1110.0,"likes":62.0,"comments":0,"shares":3.0,"saves":1.0,"follows":0,"visits":2.0,"engagements":66.0,"duration":null,"caption":"","hour":13,"weekday":"Monday"},{"kind":"post","date":"2026-05-07T11:31:00","ym":"2026-05","impressions":1079.0,"reach":867.0,"likes":36.0,"comments":1.0,"shares":12.0,"saves":0,"follows":1.0,"visits":9.0,"engagements":49.0,"duration":null,"caption":"Last call, Niners! \u26cf\ufe0f Today (May 7) is the LAST DAY to: \ud83d\udcda Return Niner Course Pack rentals to the Popp Martin Student Union bookstore. \ud83c\udf74 Use your remaining meal swipes before they ","hour":11,"weekday":"Thursday"}],"top_stories":[{"kind":"story","date":"2026-04-08T07:58:00","ym":"2026-04","impressions":2592.0,"reach":2291.0,"likes":0,"comments":0,"shares":4.0,"saves":0,"follows":0,"visits":0,"engagements":4.0,"duration":null,"caption":"","hour":7,"weekday":"Wednesday"},{"kind":"story","date":"2026-02-09T15:06:00","ym":"2026-02","impressions":772.0,"reach":707.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":0,"engagements":1.0,"duration":null,"caption":"","hour":15,"weekday":"Monday"},{"kind":"story","date":"2026-08-14T06:46:00","ym":"2026-08","impressions":718.0,"reach":616.0,"likes":0,"comments":0,"shares":2.0,"saves":0,"follows":0,"visits":1.0,"engagements":2.0,"duration":null,"caption":"","hour":6,"weekday":"Friday"},{"kind":"story","date":"2025-12-04T09:06:00","ym":"2025-12","impressions":702.0,"reach":646.0,"likes":0,"comments":0,"shares":3.0,"saves":0,"follows":0,"visits":1.0,"engagements":3.0,"duration":null,"caption":"Take the survey and be entered to win one out of five $100 B&amp;N Charlotte gift cards. Help shape the future of parking and transportation at Charlotte!","hour":9,"weekday":"Thursday"},{"kind":"story","date":"2026-08-31T08:15:00","ym":"2026-08","impressions":635.0,"reach":548.0,"likes":0,"comments":0,"shares":3.0,"saves":0,"follows":0,"visits":0,"engagements":3.0,"duration":null,"caption":"","hour":8,"weekday":"Monday"},{"kind":"story","date":"2025-11-26T08:40:00","ym":"2025-11","impressions":584.0,"reach":557.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":0,"engagements":1.0,"duration":null,"caption":"","hour":8,"weekday":"Wednesday"},{"kind":"story","date":"2025-11-26T08:40:00","ym":"2025-11","impressions":518.0,"reach":485.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":0,"engagements":1.0,"duration":null,"caption":"","hour":8,"weekday":"Wednesday"},{"kind":"story","date":"2026-07-20T13:05:00","ym":"2026-07","impressions":474.0,"reach":457.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":1.0,"visits":4.0,"engagements":1.0,"duration":null,"caption":"","hour":13,"weekday":"Monday"}],"story_weekdays":{"Tuesday":81,"Saturday":7,"Friday":68,"Thursday":72,"Wednesday":77,"Monday":92,"Sunday":7},"story_hours":{"17":4,"11":54,"9":32,"15":18,"10":46,"5":11,"13":28,"12":43,"7":46,"14":28,"8":51,"6":27,"16":4,"18":4,"4":6,"19":2},"monthly":[{"month":"2025-10","joins":41,"audience_remaining":41,"posts":12,"reels":3,"stories":33,"feed":15,"published_all":48,"impressions":11176.0,"engagements":325.0,"likes":252.0,"shares":64.0,"reach":10391.0,"post_impressions":2250.0,"reel_plays":3335.0,"story_impressions":5591.0,"insight_posts":2,"insight_reels":3,"insight_stories":33},{"month":"2025-11","joins":13,"audience_remaining":54,"posts":12,"reels":3,"stories":29,"feed":15,"published_all":44,"impressions":7618.0,"engagements":127.0,"likes":120.0,"shares":6.0,"reach":7102.0,"post_impressions":1469.0,"reel_plays":1826.0,"story_impressions":4323.0,"insight_posts":3,"insight_reels":3,"insight_stories":29},{"month":"2025-12","joins":15,"audience_remaining":69,"posts":8,"reels":1,"stories":20,"feed":9,"published_all":29,"impressions":6709.0,"engagements":179.0,"likes":149.0,"shares":26.0,"reach":6228.0,"post_impressions":2192.0,"reel_plays":1309.0,"story_impressions":3208.0,"insight_posts":3,"insight_reels":1,"insight_stories":20},{"month":"2026-01","joins":39,"audience_remaining":108,"posts":22,"reels":1,"stories":22,"feed":23,"published_all":45,"impressions":15658.0,"engagements":651.0,"likes":528.0,"shares":90.0,"reach":13887.0,"post_impressions":8530.0,"reel_plays":3580.0,"story_impressions":3548.0,"insight_posts":6,"insight_reels":1,"insight_stories":22},{"month":"2026-02","joins":53,"audience_remaining":161,"posts":16,"reels":2,"stories":39,"feed":18,"published_all":57,"impressions":11401.0,"engagements":260.0,"likes":174.0,"shares":57.0,"reach":10651.0,"post_impressions":1432.0,"reel_plays":3040.0,"story_impressions":6929.0,"insight_posts":2,"insight_reels":2,"insight_stories":39},{"month":"2026-03","joins":44,"audience_remaining":205,"posts":11,"reels":6,"stories":29,"feed":17,"published_all":46,"impressions":22439.0,"engagements":1094.0,"likes":820.0,"shares":232.0,"reach":20721.0,"post_impressions":5284.0,"reel_plays":13630.0,"story_impressions":3525.0,"insight_posts":4,"insight_reels":6,"insight_stories":29},{"month":"2026-04","joins":43,"audience_remaining":248,"posts":26,"reels":4,"stories":50,"feed":30,"published_all":80,"impressions":25679.0,"engagements":629.0,"likes":530.0,"shares":80.0,"reach":23688.0,"post_impressions":460.0,"reel_plays":15502.0,"story_impressions":9717.0,"insight_posts":1,"insight_reels":4,"insight_stories":50},{"month":"2026-05","joins":17,"audience_remaining":265,"posts":23,"reels":1,"stories":10,"feed":24,"published_all":34,"impressions":11424.0,"engagements":355.0,"likes":280.0,"shares":56.0,"reach":10309.0,"post_impressions":8296.0,"reel_plays":1734.0,"story_impressions":1394.0,"insight_posts":4,"insight_reels":1,"insight_stories":10},{"month":"2026-06","joins":106,"audience_remaining":371,"posts":18,"reels":2,"stories":12,"feed":20,"published_all":32,"impressions":13931.0,"engagements":366.0,"likes":318.0,"shares":29.0,"reach":12569.0,"post_impressions":1034.0,"reel_plays":11316.0,"story_impressions":1581.0,"insight_posts":2,"insight_reels":2,"insight_stories":12},{"month":"2026-07","joins":93,"audience_remaining":464,"posts":28,"reels":0,"stories":16,"feed":28,"published_all":44,"impressions":16244.0,"engagements":845.0,"likes":438.0,"shares":366.0,"reach":14090.0,"post_impressions":13958.0,"reel_plays":0,"story_impressions":2286.0,"insight_posts":4,"insight_reels":0,"insight_stories":16},{"month":"2026-08","joins":223,"audience_remaining":687,"posts":36,"reels":3,"stories":58,"feed":39,"published_all":97,"impressions":26856.0,"engagements":849.0,"likes":598.0,"shares":219.0,"reach":24994.0,"post_impressions":1652.0,"reel_plays":12106.0,"story_impressions":13098.0,"insight_posts":1,"insight_reels":3,"insight_stories":58},{"month":"2026-09","joins":143,"audience_remaining":830,"posts":53,"reels":5,"stories":76,"feed":58,"published_all":134,"impressions":27539.0,"engagements":636.0,"likes":466.0,"shares":142.0,"reach":25760.0,"post_impressions":1973.0,"reel_plays":12310.0,"story_impressions":13256.0,"insight_posts":2,"insight_reels":5,"insight_stories":76},{"month":"2026-10","joins":17,"audience_remaining":847,"posts":9,"reels":2,"stories":10,"feed":11,"published_all":21,"impressions":2981.0,"engagements":48.0,"likes":43.0,"shares":3.0,"reach":2930.0,"post_impressions":0,"reel_plays":1304.0,"story_impressions":1677.0,"insight_posts":0,"insight_reels":2,"insight_stories":10}],"pre_insider":{"months":[],"joins":0,"posts":0,"reels":0,"stories":0,"impressions":0,"engagements":0},"since_insider":{"months":[{"month":"2025-10","joins":41,"audience_remaining":41,"posts":12,"reels":3,"stories":33,"feed":15,"published_all":48,"impressions":11176.0,"engagements":325.0,"likes":252.0,"shares":64.0,"reach":10391.0,"post_impressions":2250.0,"reel_plays":3335.0,"story_impressions":5591.0,"insight_posts":2,"insight_reels":3,"insight_stories":33},{"month":"2025-11","joins":13,"audience_remaining":54,"posts":12,"reels":3,"stories":29,"feed":15,"published_all":44,"impressions":7618.0,"engagements":127.0,"likes":120.0,"shares":6.0,"reach":7102.0,"post_impressions":1469.0,"reel_plays":1826.0,"story_impressions":4323.0,"insight_posts":3,"insight_reels":3,"insight_stories":29},{"month":"2025-12","joins":15,"audience_remaining":69,"posts":8,"reels":1,"stories":20,"feed":9,"published_all":29,"impressions":6709.0,"engagements":179.0,"likes":149.0,"shares":26.0,"reach":6228.0,"post_impressions":2192.0,"reel_plays":1309.0,"story_impressions":3208.0,"insight_posts":3,"insight_reels":1,"insight_stories":20},{"month":"2026-01","joins":39,"audience_remaining":108,"posts":22,"reels":1,"stories":22,"feed":23,"published_all":45,"impressions":15658.0,"engagements":651.0,"likes":528.0,"shares":90.0,"reach":13887.0,"post_impressions":8530.0,"reel_plays":3580.0,"story_impressions":3548.0,"insight_posts":6,"insight_reels":1,"insight_stories":22},{"month":"2026-02","joins":53,"audience_remaining":161,"posts":16,"reels":2,"stories":39,"feed":18,"published_all":57,"impressions":11401.0,"engagements":260.0,"likes":174.0,"shares":57.0,"reach":10651.0,"post_impressions":1432.0,"reel_plays":3040.0,"story_impressions":6929.0,"insight_posts":2,"insight_reels":2,"insight_stories":39},{"month":"2026-03","joins":44,"audience_remaining":205,"posts":11,"reels":6,"stories":29,"feed":17,"published_all":46,"impressions":22439.0,"engagements":1094.0,"likes":820.0,"shares":232.0,"reach":20721.0,"post_impressions":5284.0,"reel_plays":13630.0,"story_impressions":3525.0,"insight_posts":4,"insight_reels":6,"insight_stories":29},{"month":"2026-04","joins":43,"audience_remaining":248,"posts":26,"reels":4,"stories":50,"feed":30,"published_all":80,"impressions":25679.0,"engagements":629.0,"likes":530.0,"shares":80.0,"reach":23688.0,"post_impressions":460.0,"reel_plays":15502.0,"story_impressions":9717.0,"insight_posts":1,"insight_reels":4,"insight_stories":50},{"month":"2026-05","joins":17,"audience_remaining":265,"posts":23,"reels":1,"stories":10,"feed":24,"published_all":34,"impressions":11424.0,"engagements":355.0,"likes":280.0,"shares":56.0,"reach":10309.0,"post_impressions":8296.0,"reel_plays":1734.0,"story_impressions":1394.0,"insight_posts":4,"insight_reels":1,"insight_stories":10},{"month":"2026-06","joins":106,"audience_remaining":371,"posts":18,"reels":2,"stories":12,"feed":20,"published_all":32,"impressions":13931.0,"engagements":366.0,"likes":318.0,"shares":29.0,"reach":12569.0,"post_impressions":1034.0,"reel_plays":11316.0,"story_impressions":1581.0,"insight_posts":2,"insight_reels":2,"insight_stories":12},{"month":"2026-07","joins":93,"audience_remaining":464,"posts":28,"reels":0,"stories":16,"feed":28,"published_all":44,"impressions":16244.0,"engagements":845.0,"likes":438.0,"shares":366.0,"reach":14090.0,"post_impressions":13958.0,"reel_plays":0,"story_impressions":2286.0,"insight_posts":4,"insight_reels":0,"insight_stories":16},{"month":"2026-08","joins":223,"audience_remaining":687,"posts":36,"reels":3,"stories":58,"feed":39,"published_all":97,"impressions":26856.0,"engagements":849.0,"likes":598.0,"shares":219.0,"reach":24994.0,"post_impressions":1652.0,"reel_plays":12106.0,"story_impressions":13098.0,"insight_posts":1,"insight_reels":3,"insight_stories":58},{"month":"2026-09","joins":143,"audience_remaining":830,"posts":53,"reels":5,"stories":76,"feed":58,"published_all":134,"impressions":27539.0,"engagements":636.0,"likes":466.0,"shares":142.0,"reach":25760.0,"post_impressions":1973.0,"reel_plays":12310.0,"story_impressions":13256.0,"insight_posts":2,"insight_reels":5,"insight_stories":76},{"month":"2026-10","joins":17,"audience_remaining":847,"posts":9,"reels":2,"stories":10,"feed":11,"published_all":21,"impressions":2981.0,"engagements":48.0,"likes":43.0,"shares":3.0,"reach":2930.0,"post_impressions":0,"reel_plays":1304.0,"story_impressions":1677.0,"insight_posts":0,"insight_reels":2,"insight_stories":10}],"joins":847,"posts":274,"reels":33,"stories":404,"impressions":199655.0,"engagements":6364.0}},"niner":{"handle":"@clt_ninerinsider","signup":{"Username":"Niner Insider","Time":"Jun 24, 2025 11:13 am"},"official":{"generated":"2026-10-09T20:58Z","audience":{"Date Range":"Jul 11 - Oct 8","Followers":"2,225","Followers Delta":"+30.4% vs Apr 12 - Jul 10","Follows":"614","Unfollows":"94","Overall followers":"520","Follower Percentage by City":"Charlotte: 56.7%, Concord: 2.7%, Harrisburg: 1.8%, Huntersville: 1.4%, Raleigh: 1.3%","Follower Percentage by Country":"United States: 98.7%, India: 0.2%, Iran: 0%, Mexico: 0%, Brazil: 0%","Follower Percentage by Age for All Genders":"13-17: 0.6%, 18-24: 47.2%, 25-34: 17.9%, 35-44: 9.5%, 45-54: 16.5%, 55-64: 6.2%, 65+: 1.7%","Follower Percentage by Age for Men":"13-17: 0.7%, 18-24: 53.2%, 25-34: 20.4%, 35-44: 7.5%, 45-54: 11.3%, 55-64: 5%, 65+: 1.5%","Follower Percentage by Age for Women":"13-17: 0.5%, 18-24: 44.4%, 25-34: 13.1%, 35-44: 12.4%, 45-54: 21.4%, 55-64: 6.4%, 65+: 1.5%","Total Follower Percentage for Men":"32%","Total Follower Percentage for Women":"67.9%","Monday Follower Activity":"1,966","Tuesday Follower Activity":"1,963","Wednesday Follower Activity":"1,955","Thursday Follower Activity":"1,954","Friday Follower Activity":"1,969","Saturday Follower Activity":"1,975","Sunday Follower Activity":"1,975"},"reach":{"Date Range":"Jul 11 - Oct 8","Accounts Reached":"35840","Accounts Reached Delta":"+67.6% vs Apr 12 - Jul 10","Followers":"5.6%","Non-Followers":"94.4%","Non-Followers Delta":"You reached +67.4% more accounts that weren&#039;t following you compared to Apr 12 - Jul 10.","Impressions":"142,299","Impressions Delta":"+109%","Profile visits":"3,166","Profile Visits Delta":"+208%","External link taps":"150","External link taps delta":"+837%"},"interactions":{"Date Range":"Jul 11 - Oct 8","Content Interactions":"6,724","Content Interactions Delta":"+229% vs Apr 12 - Jul 10","Post Interactions":"4,389","Post Interactions Delta":"+436% vs Apr 12 - Jul 10","Story Interactions":"1,110","Story Interactions Delta":"+523% vs Apr 12 - Jul 10","Video Interactions":"0","Video Interactions Delta":"0% vs Apr 12 - Jul 10","Reels Interactions":"1,225","Reels Interactions Delta":"+17.4% vs Apr 12 - Jul 10","Live Video Interactions":"0","Live Video Interactions Delta":"0% vs Apr 12 - Jul 10","Post Likes":"2,265","Post Comments":"146","Post Shares":"900","Post Saves":"108","Story Replies":"4","Story Shares":"411","Reels Likes":"860","Reels Comments":"43","Reels Shares":"114","Reels Saves":"53","Accounts engaged":"2,605","Accounts Engaged Delta":"+115% vs Apr 12 - Jul 10","Engaged Account By Follow Type":"Followers: 26.9%, Non-followers: 73.1%","You engaged delta% more accounts that weren\u2019t following you compared to previous period":"+123% vs Apr 12 - Jul 10"}},"follower_count":1081,"follower_count_window":1081,"following_count":0,"insight_counts":{"posts":4,"reels":19,"stories":642},"top_reels":[{"kind":"reel","date":"2026-03-19T06:01:00","ym":"2026-03","impressions":11867.0,"reach":10566.0,"likes":244.0,"comments":4.0,"shares":14.0,"saves":7.0,"follows":0,"visits":0,"engagements":269.0,"duration":59.0,"caption":"&#064;charlotteskiandsnowboard react to the 2026 Winter Olympics \ud83c\udfc5 \u26f7\ufe0f Kylie Creasser and Luke Wilson shared what it\u2019s like watching the highest level of competition for their sport","hour":6,"weekday":"Thursday"},{"kind":"reel","date":"2026-02-06T11:06:00","ym":"2026-02","impressions":9693.0,"reach":9102.0,"likes":43.0,"comments":2.0,"shares":6.0,"saves":1.0,"follows":0,"visits":0,"engagements":52.0,"duration":62.0,"caption":"Who wins the Super Bowl? Here\u2019s what the data says \ud83c\udfc8\ud83d\udcca &#064;tobias_stats\u2019 Intro to Sports Analytics class broke down the key metrics to victory between the New England #Patriots an","hour":11,"weekday":"Friday"},{"kind":"reel","date":"2025-10-30T05:51:00","ym":"2025-10","impressions":8324.0,"reach":7539.0,"likes":94.0,"comments":4.0,"shares":27.0,"saves":5.0,"follows":0,"visits":0,"engagements":130.0,"duration":30.0,"caption":"An inside look at the Haunted Union \ud83d\udc7b Tonight, Thursday, Oct. 30, the Popp Martin Student Union transforms into a Halloween-themed spooktacular with caricature artists, a pop up ga","hour":5,"weekday":"Thursday"},{"kind":"reel","date":"2026-05-28T09:40:00","ym":"2026-05","impressions":7441.0,"reach":7124.0,"likes":131.0,"comments":0,"shares":9.0,"saves":4.0,"follows":0,"visits":0,"engagements":144.0,"duration":16.0,"caption":"Campus feels a little quiet these days \u2026.","hour":9,"weekday":"Thursday"},{"kind":"reel","date":"2026-06-08T07:54:00","ym":"2026-06","impressions":6319.0,"reach":5878.0,"likes":399.0,"comments":5.0,"shares":19.0,"saves":8.0,"follows":0,"visits":0,"engagements":431.0,"duration":18.0,"caption":"Love this place \ud83d\udc9a Drop your favorite spot on campus \ud83d\udc47","hour":7,"weekday":"Monday"},{"kind":"reel","date":"2026-08-21T04:40:00","ym":"2026-08","impressions":4334.0,"reach":3618.0,"likes":168.0,"comments":31.0,"shares":27.0,"saves":1.0,"follows":0,"visits":0,"engagements":227.0,"duration":61.0,"caption":"UNC Charlotte\u2019s connection to the city provided remarkable opportunities for students seeking hands-on opportunities for experiential learning. Hattie Rose, a second-year Levine Sc","hour":4,"weekday":"Friday"},{"kind":"reel","date":"2026-09-21T07:13:00","ym":"2026-09","impressions":3564.0,"reach":3023.0,"likes":95.0,"comments":5.0,"shares":25.0,"saves":1.0,"follows":0,"visits":0,"engagements":126.0,"duration":23.0,"caption":"Some of the best orientation memories are the ones you don\u2019t plan. \ud83d\udc9a For orientation counselor Jenni Eason, it\u2019s the moments spent laughing with her coworkers that stand out most. ","hour":7,"weekday":"Monday"},{"kind":"reel","date":"2026-10-08T10:46:00","ym":"2026-10","impressions":2675.0,"reach":2514.0,"likes":108.0,"comments":0,"shares":12.0,"saves":3.0,"follows":0,"visits":0,"engagements":123.0,"duration":38.0,"caption":"In recognition of Fire Prevention Week, the Fire and Safety Technologists student organization hosted a mock dorm room burn demonstration in collaboration with Environmental Health","hour":10,"weekday":"Thursday"},{"kind":"reel","date":"2026-07-21T10:09:00","ym":"2026-07","impressions":2592.0,"reach":2319.0,"likes":109.0,"comments":1.0,"shares":21.0,"saves":21.0,"follows":0,"visits":0,"engagements":152.0,"duration":28.0,"caption":"What starts at UNC Charlotte can go far beyond graduation. Mechanical engineering alumnus Colton McComas transformed years of hands-on automotive experience into Fixxr, an app help","hour":10,"weekday":"Tuesday"},{"kind":"reel","date":"2026-02-12T09:49:00","ym":"2026-02","impressions":2499.0,"reach":2127.0,"likes":76.0,"comments":3.0,"shares":18.0,"saves":10.0,"follows":0,"visits":0,"engagements":107.0,"duration":49.0,"caption":"Here\u2019s how you crush the career fair \ud83d\udcbc Spring career and internship fair is tomorrow, Friday, Feb. 13, and &#064;cltcareercenter has advice on how to maximize your opportunities an","hour":9,"weekday":"Thursday"},{"kind":"reel","date":"2026-09-03T06:01:00","ym":"2026-09","impressions":2359.0,"reach":1969.0,"likes":75.0,"comments":1.0,"shares":6.0,"saves":1.0,"follows":0,"visits":0,"engagements":83.0,"duration":10.0,"caption":"Join &#064;cltauxservices at the Barnes &amp; Noble Charlotte Bookstore in the Popp Martin Student Union on Friday, Sept. 4, for College Colors Day. Celebrate our Niner \ud83d\udc9a &amp; \ud83e\udd0d a","hour":6,"weekday":"Thursday"},{"kind":"reel","date":"2026-04-23T10:04:00","ym":"2026-04","impressions":2262.0,"reach":2036.0,"likes":74.0,"comments":8.0,"shares":10.0,"saves":3.0,"follows":0,"visits":0,"engagements":95.0,"duration":58.0,"caption":"Student initiative reignites hope \u2696\ufe0f April is Second Chance Month, a nationwide effort to raise awareness about reintegration for previously incarcerated individuals and their fami","hour":10,"weekday":"Thursday"}],"top_posts":[{"kind":"post","date":"2026-08-21T11:53:00","ym":"2026-08","impressions":3262.0,"reach":2447.0,"likes":71.0,"comments":0,"shares":12.0,"saves":0,"follows":2.0,"visits":20.0,"engagements":83.0,"duration":null,"caption":"","hour":11,"weekday":"Friday"},{"kind":"post","date":"2026-09-25T05:28:00","ym":"2026-09","impressions":2150.0,"reach":1686.0,"likes":69.0,"comments":0,"shares":20.0,"saves":8.0,"follows":2.0,"visits":24.0,"engagements":97.0,"duration":null,"caption":"","hour":5,"weekday":"Friday"},{"kind":"post","date":"2026-03-25T11:06:00","ym":"2026-03","impressions":1255.0,"reach":1043.0,"likes":45.0,"comments":0,"shares":6.0,"saves":0,"follows":1.0,"visits":9.0,"engagements":51.0,"duration":null,"caption":"49 hours. One Niner Nation. \u26cf\ufe0f In less than a week from today, we kick off #NinerNationGives to support &#064;unccharlotte and our campus community. Learn more \u27a1\ufe0f ninernationgives.","hour":11,"weekday":"Wednesday"},{"kind":"post","date":"2026-03-18T05:31:00","ym":"2026-03","impressions":503.0,"reach":469.0,"likes":21.0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":4.0,"engagements":22.0,"duration":null,"caption":"","hour":5,"weekday":"Wednesday"}],"top_stories":[{"kind":"story","date":"2026-01-07T06:24:00","ym":"2026-01","impressions":8344.0,"reach":8000.0,"likes":0,"comments":0,"shares":2.0,"saves":0,"follows":0,"visits":0,"engagements":2.0,"duration":null,"caption":"&#064;unccharlotte is hiring a paid social media student content creator!","hour":6,"weekday":"Wednesday"},{"kind":"story","date":"2026-02-06T07:38:00","ym":"2026-02","impressions":1690.0,"reach":1595.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":0,"engagements":1.0,"duration":null,"caption":"","hour":7,"weekday":"Friday"},{"kind":"story","date":"2026-03-02T05:58:00","ym":"2026-03","impressions":1454.0,"reach":1386.0,"likes":0,"comments":0,"shares":3.0,"saves":0,"follows":0,"visits":0,"engagements":3.0,"duration":null,"caption":"Layne Riggs \u201924 won his first trophy of the 2026 NASCAR Truck Series on Saturday \ud83c\udfc6","hour":5,"weekday":"Monday"},{"kind":"story","date":"2026-01-21T06:47:00","ym":"2026-01","impressions":1400.0,"reach":1258.0,"likes":0,"comments":0,"shares":9.0,"saves":0,"follows":0,"visits":0,"engagements":9.0,"duration":null,"caption":"","hour":6,"weekday":"Wednesday"},{"kind":"story","date":"2026-04-03T08:51:00","ym":"2026-04","impressions":1396.0,"reach":1351.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":0,"engagements":1.0,"duration":null,"caption":"","hour":8,"weekday":"Friday"},{"kind":"story","date":"2026-08-24T07:16:00","ym":"2026-08","impressions":1260.0,"reach":1218.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":2.0,"engagements":1.0,"duration":null,"caption":"","hour":7,"weekday":"Monday"},{"kind":"story","date":"2026-08-24T07:15:00","ym":"2026-08","impressions":1030.0,"reach":1011.0,"likes":0,"comments":0,"shares":3.0,"saves":0,"follows":0,"visits":1.0,"engagements":3.0,"duration":null,"caption":"","hour":7,"weekday":"Monday"},{"kind":"story","date":"2026-05-08T07:57:00","ym":"2026-05","impressions":1015.0,"reach":966.0,"likes":0,"comments":0,"shares":1.0,"saves":0,"follows":0,"visits":0,"engagements":1.0,"duration":null,"caption":"","hour":7,"weekday":"Friday"}],"story_weekdays":{"Thursday":77,"Wednesday":49,"Tuesday":69,"Monday":216,"Friday":223,"Sunday":6,"Saturday":2},"story_hours":{"10":102,"5":42,"6":62,"9":76,"8":117,"7":86,"17":2,"12":39,"11":60,"4":21,"15":2,"16":1,"19":2,"13":23,"3":3,"2":1,"18":3},"monthly":[{"month":"2025-10","joins":36,"audience_remaining":36,"posts":1,"reels":1,"stories":45,"feed":2,"published_all":47,"impressions":22342.0,"engagements":148.0,"likes":94.0,"shares":45.0,"reach":21120.0,"post_impressions":0,"reel_plays":8324.0,"story_impressions":14018.0,"insight_posts":0,"insight_reels":1,"insight_stories":45},{"month":"2025-11","joins":41,"audience_remaining":77,"posts":4,"reels":0,"stories":48,"feed":4,"published_all":52,"impressions":13169.0,"engagements":27.0,"likes":0,"shares":27.0,"reach":12822.0,"post_impressions":0,"reel_plays":0,"story_impressions":13169.0,"insight_posts":0,"insight_reels":0,"insight_stories":48},{"month":"2025-12","joins":35,"audience_remaining":112,"posts":2,"reels":1,"stories":26,"feed":3,"published_all":29,"impressions":8732.0,"engagements":65.0,"likes":46.0,"shares":17.0,"reach":8569.0,"post_impressions":0,"reel_plays":1026.0,"story_impressions":7706.0,"insight_posts":0,"insight_reels":1,"insight_stories":26},{"month":"2026-01","joins":96,"audience_remaining":208,"posts":7,"reels":0,"stories":59,"feed":7,"published_all":66,"impressions":26542.0,"engagements":21.0,"likes":0,"shares":21.0,"reach":25714.0,"post_impressions":0,"reel_plays":0,"story_impressions":26542.0,"insight_posts":0,"insight_reels":0,"insight_stories":59},{"month":"2026-02","joins":50,"audience_remaining":258,"posts":6,"reels":2,"stories":66,"feed":8,"published_all":74,"impressions":31475.0,"engagements":194.0,"likes":119.0,"shares":59.0,"reach":29922.0,"post_impressions":0,"reel_plays":12192.0,"story_impressions":19283.0,"insight_posts":0,"insight_reels":2,"insight_stories":66},{"month":"2026-03","joins":52,"audience_remaining":310,"posts":7,"reels":1,"stories":68,"feed":8,"published_all":76,"impressions":27824.0,"engagements":367.0,"likes":310.0,"shares":46.0,"reach":25934.0,"post_impressions":1758.0,"reel_plays":11867.0,"story_impressions":14199.0,"insight_posts":2,"insight_reels":1,"insight_stories":68},{"month":"2026-04","joins":51,"audience_remaining":361,"posts":1,"reels":3,"stories":87,"feed":4,"published_all":91,"impressions":21940.0,"engagements":217.0,"likes":167.0,"shares":34.0,"reach":21325.0,"post_impressions":0,"reel_plays":4485.0,"story_impressions":17455.0,"insight_posts":0,"insight_reels":3,"insight_stories":87},{"month":"2026-05","joins":45,"audience_remaining":406,"posts":8,"reels":1,"stories":36,"feed":9,"published_all":45,"impressions":15066.0,"engagements":152.0,"likes":131.0,"shares":17.0,"reach":14572.0,"post_impressions":0,"reel_plays":7441.0,"story_impressions":7625.0,"insight_posts":0,"insight_reels":1,"insight_stories":36},{"month":"2026-06","joins":95,"audience_remaining":501,"posts":4,"reels":2,"stories":28,"feed":6,"published_all":34,"impressions":11810.0,"engagements":519.0,"likes":468.0,"shares":36.0,"reach":11317.0,"post_impressions":0,"reel_plays":7445.0,"story_impressions":4365.0,"insight_posts":0,"insight_reels":2,"insight_stories":28},{"month":"2026-07","joins":80,"audience_remaining":581,"posts":2,"reels":3,"stories":29,"feed":5,"published_all":34,"impressions":12421.0,"engagements":289.0,"likes":222.0,"shares":37.0,"reach":11955.0,"post_impressions":0,"reel_plays":5600.0,"story_impressions":6821.0,"insight_posts":0,"insight_reels":3,"insight_stories":29},{"month":"2026-08","joins":344,"audience_remaining":925,"posts":21,"reels":2,"stories":57,"feed":23,"published_all":80,"impressions":35213.0,"engagements":656.0,"likes":269.0,"shares":351.0,"reach":33222.0,"post_impressions":3262.0,"reel_plays":5450.0,"story_impressions":26501.0,"insight_posts":1,"insight_reels":2,"insight_stories":57},{"month":"2026-09","joins":128,"audience_remaining":1053,"posts":12,"reels":2,"stories":63,"feed":14,"published_all":77,"impressions":25985.0,"engagements":335.0,"likes":239.0,"shares":80.0,"reach":24245.0,"post_impressions":2150.0,"reel_plays":5923.0,"story_impressions":17912.0,"insight_posts":1,"insight_reels":2,"insight_stories":63},{"month":"2026-10","joins":28,"audience_remaining":1081,"posts":6,"reels":1,"stories":30,"feed":7,"published_all":37,"impressions":11429.0,"engagements":191.0,"likes":108.0,"shares":80.0,"reach":11073.0,"post_impressions":0,"reel_plays":2675.0,"story_impressions":8754.0,"insight_posts":0,"insight_reels":1,"insight_stories":30}],"pre_insider":{"months":[],"joins":0,"posts":0,"reels":0,"stories":0,"impressions":0,"engagements":0},"since_insider":{"months":[{"month":"2025-10","joins":36,"audience_remaining":36,"posts":1,"reels":1,"stories":45,"feed":2,"published_all":47,"impressions":22342.0,"engagements":148.0,"likes":94.0,"shares":45.0,"reach":21120.0,"post_impressions":0,"reel_plays":8324.0,"story_impressions":14018.0,"insight_posts":0,"insight_reels":1,"insight_stories":45},{"month":"2025-11","joins":41,"audience_remaining":77,"posts":4,"reels":0,"stories":48,"feed":4,"published_all":52,"impressions":13169.0,"engagements":27.0,"likes":0,"shares":27.0,"reach":12822.0,"post_impressions":0,"reel_plays":0,"story_impressions":13169.0,"insight_posts":0,"insight_reels":0,"insight_stories":48},{"month":"2025-12","joins":35,"audience_remaining":112,"posts":2,"reels":1,"stories":26,"feed":3,"published_all":29,"impressions":8732.0,"engagements":65.0,"likes":46.0,"shares":17.0,"reach":8569.0,"post_impressions":0,"reel_plays":1026.0,"story_impressions":7706.0,"insight_posts":0,"insight_reels":1,"insight_stories":26},{"month":"2026-01","joins":96,"audience_remaining":208,"posts":7,"reels":0,"stories":59,"feed":7,"published_all":66,"impressions":26542.0,"engagements":21.0,"likes":0,"shares":21.0,"reach":25714.0,"post_impressions":0,"reel_plays":0,"story_impressions":26542.0,"insight_posts":0,"insight_reels":0,"insight_stories":59},{"month":"2026-02","joins":50,"audience_remaining":258,"posts":6,"reels":2,"stories":66,"feed":8,"published_all":74,"impressions":31475.0,"engagements":194.0,"likes":119.0,"shares":59.0,"reach":29922.0,"post_impressions":0,"reel_plays":12192.0,"story_impressions":19283.0,"insight_posts":0,"insight_reels":2,"insight_stories":66},{"month":"2026-03","joins":52,"audience_remaining":310,"posts":7,"reels":1,"stories":68,"feed":8,"published_all":76,"impressions":27824.0,"engagements":367.0,"likes":310.0,"shares":46.0,"reach":25934.0,"post_impressions":1758.0,"reel_plays":11867.0,"story_impressions":14199.0,"insight_posts":2,"insight_reels":1,"insight_stories":68},{"month":"2026-04","joins":51,"audience_remaining":361,"posts":1,"reels":3,"stories":87,"feed":4,"published_all":91,"impressions":21940.0,"engagements":217.0,"likes":167.0,"shares":34.0,"reach":21325.0,"post_impressions":0,"reel_plays":4485.0,"story_impressions":17455.0,"insight_posts":0,"insight_reels":3,"insight_stories":87},{"month":"2026-05","joins":45,"audience_remaining":406,"posts":8,"reels":1,"stories":36,"feed":9,"published_all":45,"impressions":15066.0,"engagements":152.0,"likes":131.0,"shares":17.0,"reach":14572.0,"post_impressions":0,"reel_plays":7441.0,"story_impressions":7625.0,"insight_posts":0,"insight_reels":1,"insight_stories":36},{"month":"2026-06","joins":95,"audience_remaining":501,"posts":4,"reels":2,"stories":28,"feed":6,"published_all":34,"impressions":11810.0,"engagements":519.0,"likes":468.0,"shares":36.0,"reach":11317.0,"post_impressions":0,"reel_plays":7445.0,"story_impressions":4365.0,"insight_posts":0,"insight_reels":2,"insight_stories":28},{"month":"2026-07","joins":80,"audience_remaining":581,"posts":2,"reels":3,"stories":29,"feed":5,"published_all":34,"impressions":12421.0,"engagements":289.0,"likes":222.0,"shares":37.0,"reach":11955.0,"post_impressions":0,"reel_plays":5600.0,"story_impressions":6821.0,"insight_posts":0,"insight_reels":3,"insight_stories":29},{"month":"2026-08","joins":344,"audience_remaining":925,"posts":21,"reels":2,"stories":57,"feed":23,"published_all":80,"impressions":35213.0,"engagements":656.0,"likes":269.0,"shares":351.0,"reach":33222.0,"post_impressions":3262.0,"reel_plays":5450.0,"story_impressions":26501.0,"insight_posts":1,"insight_reels":2,"insight_stories":57},{"month":"2026-09","joins":128,"audience_remaining":1053,"posts":12,"reels":2,"stories":63,"feed":14,"published_all":77,"impressions":25985.0,"engagements":335.0,"likes":239.0,"shares":80.0,"reach":24245.0,"post_impressions":2150.0,"reel_plays":5923.0,"story_impressions":17912.0,"insight_posts":1,"insight_reels":2,"insight_stories":63},{"month":"2026-10","joins":28,"audience_remaining":1081,"posts":6,"reels":1,"stories":30,"feed":7,"published_all":37,"impressions":11429.0,"engagements":191.0,"likes":108.0,"shares":80.0,"reach":11073.0,"post_impressions":0,"reel_plays":2675.0,"story_impressions":8754.0,"insight_posts":0,"insight_reels":1,"insight_stories":30}],"joins":1081,"posts":81,"reels":19,"stories":642,"impressions":263948.0,"engagements":3181.0}},"overlap":{"both":202,"aux_only":645,"niner_only":879,"aux_total":847,"niner_total":1081,"both_pct_of_aux":23.8,"both_pct_of_niner":18.7}};
+const AUX_COLOR = "#1b365d";
+const NINER_COLOR = "#c45c26";
+const n = v => (v==null||v==="") ? "—" : Number(String(v).replace(/,/g,"")).toLocaleString();
+const pct = v => v==null ? "—" : v;
+function num(v){ if(v==null||v==="") return null; const x=Number(String(v).replace(/,/g,"")); return Number.isFinite(x)?x:null; }
+
+function officialRows(){
+  const A=DATA.aux.since_insider, N=DATA.niner.since_insider;
+  return [
+    ["New follows still on the account", n(A.joins), n(N.joins)],
+    ["Feed posts published", n(A.posts), n(N.posts)],
+    ["Reels published", n(A.reels), n(N.reels)],
+    ["Stories published", n(A.stories), n(N.stories)],
+    ["Card impressions (posts + reel plays + stories)", n(Math.round(A.impressions)), n(Math.round(N.impressions))],
+    ["Card engagements (likes, comments, shares, saves, reactions)", n(Math.round(A.engagements)), n(Math.round(N.engagements))],
+  ];
+}
+
+function renderOfficial(){
+  const rows = officialRows().map(r => `<tr><td>${r[0]}</td><td class="num aux">${r[1]}</td><td class="num niner">${r[2]}</td></tr>`).join("");
+  document.getElementById("official").innerHTML =
+    `<table><thead><tr><th>Metric in the shared window</th><th class="num">Aux</th><th class="num">Niner Insider</th></tr></thead><tbody>${rows}</tbody></table>`;
+  document.getElementById("fairNote").textContent =
+    "These totals count only activity dated October 14, 2025 through October 8, 2026 on both accounts. Joins are people who still follow and whose follow date falls in that window. Card impressions and engagements come from Insight cards in the dump; feed-post cards are incomplete on both sides.";
+}
+
+function renderKpis(){
+  const A=DATA.aux.since_insider, N=DATA.niner.since_insider;
+  const o=DATA.overlap;
+  const items = [
+    ["Aux new follows in window", n(A.joins), "Still following · dated Oct 14, 2025–Oct 8, 2026"],
+    ["Niner new follows in window", n(N.joins), "Same dates · not lifetime followers"],
+    ["Follow both accounts", n(o.both), "Overlap inside the same window only"],
+    ["Card impressions in window", `${n(Math.round(A.impressions))} vs ${n(Math.round(N.impressions))}`, "Aux vs Niner · content cards"],
+  ];
+  document.getElementById("kpis").innerHTML = items.map(([k,v,s]) =>
+    `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`
+  ).join("");
+}
+
+function renderRangeNote(){
+  document.getElementById("rangeNote").innerHTML =
+    `<b>Date range used everywhere below: October 14, 2025 through October 8, 2026.</b>
+    Aux’s Instagram download contained data from October 14, 2025 to October 14, 2026 only. That is why Aux does not show its full 2,816 current followers as named accounts.
+    Niner’s dated files run through October 8, 2026. To keep both accounts on the same ground, Niner is also cut to October 14, 2025–October 8, 2026. October 9–13 Aux activity is excluded.`;
+}
+
+function renderVerdict(){
+  const A=DATA.aux.since_insider, N=DATA.niner.since_insider;
+  const o=DATA.overlap;
+  document.getElementById("verdict").innerHTML = `
+    <h2>Verdict · same dates for both accounts</h2>
+    <p>All comparison figures use <b>October 14, 2025 – October 8, 2026</b>.</p>
+    <p>In that window, Niner added more remaining new follows (${n(N.joins)} vs ${n(A.joins)}). Aux published more feed posts (${n(A.posts)} vs ${n(N.posts)}). Niner published more stories (${n(N.stories)} vs ${n(A.stories)}).</p>
+    <p>The Venn counts only people whose follow date falls in this window on each account. ${n(o.both)} accounts followed both. That is ${o.both_pct_of_aux}% of Aux’s window list and ${o.both_pct_of_niner}% of Niner’s window list.</p>`;
+}
+
+function venn(){
+  const o = DATA.overlap;
+  const el = document.getElementById("venn");
+  el.innerHTML = `<svg viewBox="0 0 520 240" role="img" aria-label="Follower overlap">
+    <circle cx="210" cy="120" r="88" fill="#1b365d" fill-opacity=".22" stroke="#1b365d" />
+    <circle cx="310" cy="120" r="88" fill="#c45c26" fill-opacity=".22" stroke="#c45c26" />
+    <text x="165" y="118" text-anchor="middle" fill="#1b365d" font-size="20" font-weight="700">${o.aux_only.toLocaleString()}</text>
+    <text x="165" y="138" text-anchor="middle" fill="#1b365d" font-size="11">Aux only</text>
+    <text x="260" y="118" text-anchor="middle" fill="#1b365d" font-size="20" font-weight="700">${o.both.toLocaleString()}</text>
+    <text x="260" y="138" text-anchor="middle" fill="#5b6472" font-size="11">both</text>
+    <text x="355" y="118" text-anchor="middle" fill="#c45c26" font-size="20" font-weight="700">${o.niner_only.toLocaleString()}</text>
+    <text x="355" y="138" text-anchor="middle" fill="#c45c26" font-size="11">Niner only</text>
+    <text x="210" y="228" text-anchor="middle" fill="#1b365d" font-size="12">Aux in this window</text>
+    <text x="310" y="228" text-anchor="middle" fill="#c45c26" font-size="12">Niner in this window</text>
+  </svg>`;
+  document.getElementById("vennNote").innerHTML =
+    `<b>This Venn is only new follows dated October 14, 2025 – October 8, 2026 who still follow.</b>
+    Aux’s packet listed ${n(o.aux_total)} named followers in that window. Instagram’s Insights card still says Aux has 2,816 current followers. The other names were not in the file because Aux only exported October 14, 2025–October 14, 2026.
+    Niner is limited to the same dates, so launch-year follows from June–October 13, 2025 are not in this diagram.
+    ${n(o.both)} people appear on both window lists (${o.both_pct_of_aux}% of Aux’s window list; ${o.both_pct_of_niner}% of Niner’s window list).`;
+}
+
+function monthsShared(){
+  const set = new Set(DATA.aux.monthly.map(m=>m.month));
+  return DATA.niner.monthly.filter(m => set.has(m.month) && m.month >= "2025-10");
+}
+
+const METRICS = [
+  {id:"joins", label:"New follows still on account", unit:"people", why:"Who grew the audience that month. Counts people who followed then and still follow today — not official net growth."},
+  {id:"impressions", label:"Card impressions", unit:"impressions", why:"Who got seen more. Views from Insight cards (stories + reel plays + posts that have cards)."},
+  {id:"engagements", label:"Card engagements", unit:"engagements", why:"Who got more action. Likes, comments, shares, saves, and reactions on those cards."},
+  {id:"feed", label:"Feed posts + reels", unit:"items", why:"Who posted more on the feed that month."},
+  {id:"stories", label:"Stories published", unit:"stories", why:"Who posted more stories that month."},
+];
+let metric = "joins";
+
+function monthLabel(ym){
+  const names=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const [y,m]=ym.split("-");
+  return names[+m-1] + " " + y.slice(2);
+}
+function sharedMonths(){
+  return [...new Set([
+    ...DATA.aux.monthly.map(m=>m.month),
+    ...DATA.niner.monthly.map(m=>m.month),
+  ])].filter(m => m >= "2025-10").sort();
+}
+function niceMax(v){
+  if(v<=0) return 1;
+  const p=Math.pow(10, Math.floor(Math.log10(v)));
+  return Math.ceil(v/p)*p;
+}
+function showTip(html, ev){
+  const t=document.getElementById("tip");
+  t.innerHTML=html; t.style.display="block";
+  t.style.left=(ev.clientX+12)+"px"; t.style.top=(ev.clientY+12)+"px";
+}
+function hideTip(){ document.getElementById("tip").style.display="none"; }
+
+function drawLines(elId, metricId, unit, title){
+  const months = sharedMonths();
+  const aMap = Object.fromEntries(DATA.aux.monthly.map(m=>[m.month,m]));
+  const nMap = Object.fromEntries(DATA.niner.monthly.map(m=>[m.month,m]));
+  const a = months.map(m => aMap[m]?.[metricId] || 0);
+  const b = months.map(m => nMap[m]?.[metricId] || 0);
+  const max = niceMax(Math.max(1, ...a, ...b));
+  const W=680,H=300, l=52, r=16, t=12, bot=36;
+  const x = i => l + (i*(W-l-r))/Math.max(1,months.length-1);
+  const y = v => H-bot - (v/max)*(H-t-bot);
+  const ticks=5;
+  let grid="";
+  for(let i=0;i<=ticks;i++){
+    const val=max*(i/ticks);
+    const yy=y(val);
+    grid += `<line x1="${l}" y1="${yy}" x2="${W-r}" y2="${yy}" stroke="#ece8df" />
+      <text x="${l-6}" y="${yy+3}" text-anchor="end" font-size="10" fill="#5b6472">${n(Math.round(val))}</text>`;
+  }
+  const path = (arr,color) => {
+    const d = arr.map((v,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    const dots = arr.map((v,i)=>`<circle class="pt" data-i="${i}" data-series="${color===AUX_COLOR?"Aux":"Niner"}" data-val="${v}" cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="4.5" fill="${color}" stroke="#fff" stroke-width="1.2" />`).join("");
+    return `<path d="${d}" fill="none" stroke="${color}" stroke-width="2.4" />${dots}`;
+  };
+  const labels = months.map((m,i)=>`<text x="${x(i)}" y="${H-12}" text-anchor="middle" font-size="10" fill="#5b6472">${monthLabel(m)}</text>`).join("");
+  const host=document.getElementById(elId);
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">
+    <text x="14" y="14" font-size="10" fill="#5b6472">${unit}</text>
+    ${grid}
+    <line x1="${l}" y1="${H-bot}" x2="${W-r}" y2="${H-bot}" stroke="#c9c4b8" />
+    ${path(a,AUX_COLOR)}${path(b,NINER_COLOR)}
+    ${labels}
+  </svg>`;
+  host.querySelectorAll(".pt").forEach(pt=>{
+    pt.addEventListener("mousemove", ev=>{
+      const i=+pt.dataset.i;
+      showTip(`<b>${monthLabel(months[i])}</b><br>Aux: ${n(Math.round(a[i]))} ${unit}<br>Niner: ${n(Math.round(b[i]))} ${unit}`, ev);
+    });
+    pt.addEventListener("mouseleave", hideTip);
+  });
+}
+
+function lineChart(){
+  const m = METRICS.find(x=>x.id===metric);
+  document.getElementById("chartTitle1").textContent = "How they performed · " + m.label;
+  document.getElementById("chartContext1").textContent = m.why + " Window: Oct 14, 2025 – Oct 8, 2026.";
+  drawLines("line", metric, m.unit, m.label);
+  const months = sharedMonths();
+  const aMap = Object.fromEntries(DATA.aux.monthly.map(row=>[row.month,row]));
+  const nMap = Object.fromEntries(DATA.niner.monthly.map(row=>[row.month,row]));
+  const a = months.map(mo => aMap[mo]?.[metric] || 0);
+  const b = months.map(mo => nMap[mo]?.[metric] || 0);
+  const aTot = a.reduce((s,v)=>s+v,0);
+  const bTot = b.reduce((s,v)=>s+v,0);
+  let aWins=0, nWins=0, ties=0;
+  months.forEach((_,i)=>{ if(a[i]>b[i]) aWins++; else if(b[i]>a[i]) nWins++; else ties++; });
+  const last = months.length-1;
+  const lastLead = a[last]===b[last] ? "Tied in Oct 26" : (a[last]>b[last] ? "Aux led Oct 26" : "Niner led Oct 26");
+  const windowLead = aTot===bTot ? "Tied for the window" : (aTot>bTot ? "Aux leads the window" : "Niner leads the window");
+  document.getElementById("perf").innerHTML = `
+    <div><div class="k">Aux total</div><div class="v aux">${n(Math.round(aTot))}</div></div>
+    <div><div class="k">Niner total</div><div class="v niner">${n(Math.round(bTot))}</div></div>
+    <div><div class="k">Months ahead</div><div class="v">Aux ${aWins} · Niner ${nWins}${ties?` · tie ${ties}`:""}</div></div>
+    <div><div class="k">Read</div><div class="v" style="font-size:15px">${windowLead}. ${lastLead}.</div></div>`;
+}
+
+function pairCells(a, b, first){
+  const av = Number(a)||0, bv = Number(b)||0;
+  const aCls = av>bv ? "win aux" : (av<bv ? "lose" : "tie");
+  const bCls = bv>av ? "win niner" : (bv<av ? "lose" : "tie");
+  return `<td class="num ${first?"split ":""}${aCls}">${n(Math.round(av))}</td><td class="num ${bCls}">${n(Math.round(bv))}</td>`;
+}
+
+function monthTable(){
+  const months = sharedMonths();
+  const aMap = Object.fromEntries(DATA.aux.monthly.map(m=>[m.month,m]));
+  const nMap = Object.fromEntries(DATA.niner.monthly.map(m=>[m.month,m]));
+  const keys = ["joins","feed","stories","impressions","engagements"];
+  const totA = Object.fromEntries(keys.map(k=>[k,0]));
+  const totB = Object.fromEntries(keys.map(k=>[k,0]));
+  const last = months[months.length-1];
+  const body = months.map(m=>{
+    const a=aMap[m]||{}, b=nMap[m]||{};
+    keys.forEach(k=>{ totA[k]+=Number(a[k]||0); totB[k]+=Number(b[k]||0); });
+    const label = m===last
+      ? `${monthLabel(m)}<span class="tag">through Oct 8</span>`
+      : monthLabel(m);
+    return `<tr>
+      <td class="month${m===last?" partial":""}">${label}</td>
+      ${pairCells(a.joins, b.joins, true)}
+      ${pairCells(a.feed, b.feed, true)}
+      ${pairCells(a.stories, b.stories, true)}
+      ${pairCells(a.impressions, b.impressions, true)}
+      ${pairCells(a.engagements, b.engagements, true)}
+    </tr>`;
+  }).join("");
+  const who = `<th class="num who aux">Aux</th><th class="num who niner">Niner</th>`;
+  document.getElementById("monthTable").innerHTML = `<div class="cmp-wrap"><table class="cmp">
+    <thead>
+      <tr>
+        <th class="month-h" rowspan="2">Month</th>
+        <th class="metric" colspan="2">Follows</th>
+        <th class="metric" colspan="2">Feed</th>
+        <th class="metric" colspan="2">Stories</th>
+        <th class="metric" colspan="2">Impressions</th>
+        <th class="metric" colspan="2">Engagements</th>
+      </tr>
+      <tr>${who}${who}${who}${who}${who}</tr>
+    </thead>
+    <tbody>${body}</tbody>
+    <tfoot><tr>
+      <td class="month">Window</td>
+      ${pairCells(totA.joins, totB.joins, true)}
+      ${pairCells(totA.feed, totB.feed, true)}
+      ${pairCells(totA.stories, totB.stories, true)}
+      ${pairCells(totA.impressions, totB.impressions, true)}
+      ${pairCells(totA.engagements, totB.engagements, true)}
+    </tr></tfoot>
+  </table></div>
+  <div class="cmp-key">
+    <span><i style="background:#e4ebf4"></i>Navy shade — Aux led that month</span>
+    <span><i style="background:#f6e8df"></i>Orange shade — Niner led that month</span>
+    <span>Gray number trailed. Follows = new follows still on the account.</span>
+  </div>
+  <p class="note">October 2026 is cut at October 8. Card impressions undercount feed posts because Instagram did not attach an Insights card to every post.</p>`;
+}
+
+function parsePairs(s){
+  if(!s) return [];
+  return s.split(",").map(part=>{
+    const [k,...rest]=part.split(":");
+    const val=parseFloat(String(rest.join(":")).replace("%","").trim());
+    return {label:(k||"").trim(), value: Number.isFinite(val)?val:0};
+  }).filter(x=>x.label);
+}
+function bars(items, color){
+  return items.map(it=>`<div class="bar-row"><span>${it.label}</span>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,it.value)}%;background:${color}"></div></div>
+    <span>${it.value}%</span></div>`).join("");
+}
+function audience(){
+  const A=DATA.aux.official.audience, N=DATA.niner.official.audience;
+  const agesA=parsePairs(A["Follower Percentage by Age for All Genders"]);
+  const agesN=parsePairs(N["Follower Percentage by Age for All Genders"]);
+  const cityA=parsePairs(A["Follower Percentage by City"]);
+  const cityN=parsePairs(N["Follower Percentage by City"]);
+  document.getElementById("audience").innerHTML = `
+    <table class="month-table" style="margin-bottom:14px">
+      <thead><tr><th></th><th class="pair">Aux Services</th><th class="pair2">Niner Insider</th></tr></thead>
+      <tbody>
+        <tr><td>Account opened</td><td class="aux pair">${DATA.aux.signup.Time}</td><td class="niner pair2">${DATA.niner.signup.Time}</td></tr>
+        <tr><td>Women / men</td><td class="pair">${A["Total Follower Percentage for Women"]} / ${A["Total Follower Percentage for Men"]}</td>
+          <td class="pair2">${N["Total Follower Percentage for Women"]} / ${N["Total Follower Percentage for Men"]}</td></tr>
+      </tbody>
+    </table>
+    <div class="aud-grid">
+      <div class="aud-col">
+        <h4 class="aux">Aux age mix</h4>${bars(agesA, AUX_COLOR)}
+        <h4 class="aux" style="margin-top:12px">Aux top cities</h4>${bars(cityA, AUX_COLOR)}
+      </div>
+      <div class="aud-col">
+        <h4 class="niner">Niner age mix</h4>${bars(agesN, NINER_COLOR)}
+        <h4 class="niner" style="margin-top:12px">Niner top cities</h4>${bars(cityN, NINER_COLOR)}
+      </div>
+    </div>
+    <p class="note">From Instagram’s latest 90-day audience cards, not the Oct 14, 2025–Oct 8, 2026 activity window. Niner is more student-weighted (47.2% age 18–24 vs Aux 38.1%) and more Charlotte-local (56.7% vs 48.6%).</p>`;
+}
+
+function tops(id, rows){
+  document.getElementById(id).innerHTML = `<table>
+    <thead><tr><th>Date</th><th>Clip</th><th class="num">Plays / imp.</th><th class="num">Eng.</th></tr></thead>
+    <tbody>${rows.slice(0,6).map(r=>`<tr><td>${r.date.slice(0,10)}</td><td>${(r.caption||"").slice(0,72)}</td>
+      <td class="num">${n(Math.round(r.impressions))}</td><td class="num">${n(Math.round(r.engagements))}</td></tr>`).join("")}</tbody></table>`;
+}
+
+function metricButtons(){
+  const box = document.getElementById("metricBtns");
+  box.innerHTML = METRICS.map(m => `<button data-id="${m.id}" class="${m.id===metric?"on":""}">${m.label}</button>`).join("");
+  box.onclick = e => {
+    const b = e.target.closest("button"); if(!b) return;
+    metric = b.dataset.id;
+    [...box.children].forEach(x => x.classList.toggle("on", x===b));
+    lineChart();
+  };
+}
+function renderFooter(){
+  document.getElementById("pageFoot").innerHTML =
+    `This dashboard was created by Sk &lt;<a href="mailto:Skumar54@charlotte.edu">Skumar54@charlotte.edu</a>&gt;.<br>
+    Figures are derived from the Instagram data packets for Auxiliary Services (@cltauxservices, export dated October 14, 2026) and Niner Insider (@clt_ninerinsider, export dated October 10, 2026). Comparison window: October 14, 2025 – October 8, 2026.`;
+}
+
+renderRangeNote();
+renderVerdict();
+renderKpis();
+renderOfficial();
+venn();
+metricButtons();
+lineChart();
+monthTable();
+audience();
+tops("topAux", DATA.aux.top_reels);
+tops("topNiner", DATA.niner.top_reels);
+renderFooter();
+</script>
+</body>
+</html>
